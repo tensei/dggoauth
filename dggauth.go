@@ -32,6 +32,13 @@ type Options struct {
 	HTTPClient   *http.Client
 }
 
+// OauthError ...
+type OauthError struct {
+	Error   string `json:"error"`
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+}
+
 // NewClient ...
 func NewClient(options *Options) (*Client, error) {
 	if options.ClientID == "" {
@@ -61,6 +68,7 @@ func (c *Client) generateCodeChallenge(verifier string) string {
 
 // GetAuthorizationURL ...
 func (c *Client) GetAuthorizationURL(state string) (url string, verifier string) {
+	// min lenght for verifier is 43
 	verifier = uniuri.NewLen(45)
 	challenge := c.generateCodeChallenge(verifier)
 	url = fmt.Sprintf("%s?client_id=%s&redirect_uri=%s&response_type=code&state=%s&code_challenge=%s",
@@ -98,6 +106,15 @@ func (c *Client) GetAccessToken(code, verifier string) (*AccessTokenResponse, er
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode != http.StatusOK {
+		var oe OauthError
+		err := json.NewDecoder(response.Body).Decode(&oe)
+		if err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("error getting access_token, code: %d, message: %s, err: %s", oe.Code, oe.Message, oe.Error)
+	}
+
 	var accessToken AccessTokenResponse
 	err = json.NewDecoder(response.Body).Decode(&accessToken)
 	if err != nil {
@@ -119,6 +136,15 @@ func (c *Client) RenewAccessToken(refreshToken string) (*AccessTokenResponse, er
 		return nil, err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		var oe OauthError
+		err := json.NewDecoder(response.Body).Decode(&oe)
+		if err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("error renewing access_token, code: %d, message: %s, err: %s", oe.Code, oe.Message, oe.Error)
+	}
 
 	var accessToken AccessTokenResponse
 	err = json.NewDecoder(response.Body).Decode(&accessToken)
