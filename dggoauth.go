@@ -1,4 +1,4 @@
-package dggauth
+package dggoauth
 
 import (
 	"crypto/sha256"
