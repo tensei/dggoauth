@@ -1,10 +1,3 @@
-# dggoauth
-
-this package implements the oauth flow from [here](https://github.com/destinygg/website/blob/master/OAUTH.md)
-
-## Example
-
-```go
 package main
 
 import (
@@ -16,11 +9,11 @@ import (
 
 func main() {
 
-    // ClientID and ClientSecret from here
-    // https://www.destiny.gg/profile/developer
+	// ClientID and ClientSecret from here
+	// https://www.destiny.gg/profile/developer
 	dgg, err := dggoauth.NewClient(&dggoauth.Options{
-		ClientID:     "xxxxxxxxxxxxxxxx", // required
-		ClientSecret: "xxxxxxxxxxxxxxxx", // required
+		ClientID:     "xxxxxxxxxxxxxxxx",               // required
+		ClientSecret: "xxxxxxxxxxxxxxxx",               // required
 		RedirectURI:  "https://linktomysites/callback", // required
 	})
 	if err != nil {
@@ -60,6 +53,5 @@ func main() {
 
 		c.Redirect(http.StatusFound, "/")
 	})
-    r.Run()
+	r.Run()
 }
-```

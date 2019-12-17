@@ -66,7 +66,7 @@ func (c *Client) generateCodeChallenge(verifier string) string {
 	return base64.StdEncoding.EncodeToString([]byte(sum))
 }
 
-// GetAuthorizationURL ...
+// GetAuthorizationURL returns the authorization url you need to redirect the user to
 func (c *Client) GetAuthorizationURL(state string) (url string, verifier string) {
 	// min lenght for verifier is 43
 	verifier = uniuri.NewLen(45)
@@ -90,7 +90,7 @@ type AccessTokenResponse struct {
 	TokenType    string `json:"token_type"`
 }
 
-// GetAccessToken ...
+// GetAccessToken returns the access token with the code and verifier provided
 func (c *Client) GetAccessToken(code, verifier string) (*AccessTokenResponse, error) {
 	s := fmt.Sprintf("%s?grant_type=authorization_code&code=%s&client_id=%s&redirect_uri=%s&code_verifier=%s",
 		TokenURL,
@@ -117,13 +117,10 @@ func (c *Client) GetAccessToken(code, verifier string) (*AccessTokenResponse, er
 
 	var accessToken AccessTokenResponse
 	err = json.NewDecoder(response.Body).Decode(&accessToken)
-	if err != nil {
-		return nil, err
-	}
-	return &accessToken, nil
+	return &accessToken, err
 }
 
-// RenewAccessToken ...
+// RenewAccessToken renews the access token with the refresh token provided
 func (c *Client) RenewAccessToken(refreshToken string) (*AccessTokenResponse, error) {
 	s := fmt.Sprintf("%s?grant_type=refresh_token&client_id=%s&refresh_token=%s",
 		TokenURL,
@@ -148,8 +145,5 @@ func (c *Client) RenewAccessToken(refreshToken string) (*AccessTokenResponse, er
 
 	var accessToken AccessTokenResponse
 	err = json.NewDecoder(response.Body).Decode(&accessToken)
-	if err != nil {
-		return nil, err
-	}
-	return &accessToken, nil
+	return &accessToken, err
 }
